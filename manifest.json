@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "cromewar.downloads-stack",
+  "name": "Downloads stack",
+  "version": "1.0.0",
+  "author": "Vasiliy Kirochka",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/cromewar/omarchy-downloads-stack",
+  "description": "A macOS-style stack of your most recent downloads in the Omarchy bar. Click to fan them out, drag any file straight into another app, or open the folder.",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "BarWidget.qml" },
+  "barWidget": {
+    "displayName": "Downloads stack",
+    "description": "One bar icon showing your latest download with a badge for new files. Left = open the stack, right = open the folder, middle = mark everything seen. Drag a file out of the stack into any app.",
+    "category": "Files",
+    "aliases": ["downloads", "stack", "files", "dock"],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "folder": "",
+      "maxItems": 12,
+      "view": "grid",
+      "showHidden": false,
+      "badge": "new",
+      "closeAfterDrag": true,
+      "fileManager": "nautilus"
+    },
+    "schema": [
+      {
+        "key": "folder",
+        "type": "string",
+        "label": "Folder to watch",
+        "defaultValue": "",
+        "description": "Absolute path. Empty means the XDG download directory (usually ~/Downloads)."
+      },
+      {
+        "key": "maxItems",
+        "type": "number",
+        "label": "Files in the stack",
+        "min": 1,
+        "max": 60,
+        "step": 1,
+        "defaultValue": 12
+      },
+      {
+        "key": "view",
+        "type": "string",
+        "label": "Stack layout",
+        "defaultValue": "grid",
+        "options": ["grid", "list"],
+        "description": "Grid shows thumbnails; list shows one file per row with its kind and size."
+      },
+      {
+        "key": "showHidden",
+        "type": "boolean",
+        "label": "Include hidden files",
+        "defaultValue": false
+      },
+      {
+        "key": "badge",
+        "type": "string",
+        "label": "Bar badge",
+        "defaultValue": "new",
+        "options": ["new", "count", "none"],
+        "description": "`new` counts files added since you last opened the stack, `count` shows the whole folder, `none` hides the badge."
+      },
+      {
+        "key": "closeAfterDrag",
+        "type": "boolean",
+        "label": "Close the stack after a drag",
+        "defaultValue": true
+      },
+      {
+        "key": "fileManager",
+        "type": "string",
+        "label": "File manager",
+        "defaultValue": "nautilus",
+        "description": "Used to reveal a single file. `nautilus` selects the file; anything else falls back to opening the folder with xdg-open."
+      }
+    ]
+  }
+}
