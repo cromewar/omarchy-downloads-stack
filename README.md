@@ -115,8 +115,16 @@ default), and `wl-clipboard` for copy-path.
 **A change to the plugin doesn't show up.** Bar widgets do not reliably hot-reload even
 though the shell logs `Local plugin changed, reloading`. Run `omarchy restart shell`.
 
-**The icon isn't in the bar.** Check `omarchy plugin list | grep downloads` — if it says
-`disabled`, run `omarchy plugin enable cromewar.downloads-stack` and restart the shell.
+**The icon isn't in the bar.** Check `omarchy plugin list | grep downloads`. If it says
+`disabled`, the shell was not aware of the plugin when the installer tried to enable it —
+`omarchy plugin enable` asks the running shell over IPC, and the shell only knows the
+plugins it found the last time it scanned. Rescan, then enable:
+
+```bash
+omarchy-shell shell rescanPlugins
+omarchy plugin enable cromewar.downloads-stack
+omarchy restart shell
+```
 
 ## License
 
