@@ -45,7 +45,35 @@ else
     rm -rf "$DEST/.git"
 fi
 
-omarchy plugin enable "$ID" || true
+# `omarchy plugin enable` is an IPC call into the running shell, and the shell only
+# knows about the plugins it found the last time it scanned. A plugin that was just
+# copied into place is not in that list, so the call fails with "plugin '$ID' is not
+# known" and the widget stays disabled -- which is why the icon never showed up.
+if omarchy-shell shell ping >/dev/null 2>&1; then
+    omarchy-shell -q shell rescanPlugins
+else
+    # Nothing is running to answer the IPC call; a fresh shell scans on startup.
+    omarchy restart shell || true
+fi
+
+# rescanPlugins is fire-and-forget: it returns before the shell has registered the
+# new plugin, so enabling has to be retried until the scan lands.
+attempt=0
+until omarchy plugin enable "$ID" >/dev/null 2>&1; do
+    attempt=$((attempt + 1))
+    if [ "$attempt" -ge 20 ]; then
+        echo >&2
+        echo "Error: the files are in $DEST, but enabling $ID failed:" >&2
+        omarchy plugin enable "$ID" >&2 || true
+        echo >&2
+        echo "Finish by hand with:" >&2
+        echo "    omarchy-shell shell rescanPlugins" >&2
+        echo "    omarchy plugin enable $ID" >&2
+        echo "    omarchy restart shell" >&2
+        exit 1
+    fi
+    sleep 0.25
+done
 
 # Bar widgets do not reliably hot-reload; restart so the icon actually appears.
 omarchy restart shell || true
