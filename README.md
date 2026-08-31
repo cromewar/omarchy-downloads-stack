@@ -6,7 +6,7 @@ downloads fan out — then **drag any file straight into another app**: a browse
 field, an editor, a chat window, Files. Or click the footer and open the folder.
 
 <p align="center">
-  <img src="docs/drag.png" alt="Dragging a file out of the stack into another window" width="640">
+  <img src="preview.png" alt="Dragging a file out of the stack into another window" width="640">
 </p>
 
 This is a Hyprland/Quickshell port of
@@ -15,28 +15,37 @@ This is a Hyprland/Quickshell port of
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/cromewar/omarchy-downloads-stack/main/install.sh | sh
+omarchy plugin add https://github.com/cromewar/omarchy-downloads-stack.git --enable
 ```
 
-That drops the plugin in `~/.config/omarchy/plugins/`, enables it, and restarts the
-shell. The folder icon appears in the right-hand section of your bar.
-
-<details>
-<summary>Manual install (from a clone)</summary>
-
-```sh
-git clone https://github.com/cromewar/omarchy-downloads-stack.git \
-  ~/.config/omarchy/plugins/cromewar.downloads-stack
-omarchy plugin enable cromewar.downloads-stack
-omarchy restart shell
-```
-</details>
+`omarchy plugin add` clones the repository into
+`~/.config/omarchy/plugins/cromewar.downloads-stack`, validates the manifest, asks which
+bar section to use (default: right) and enables the widget. If the icon does not show up
+straight away, run `omarchy restart shell`.
 
 Move it anywhere on the bar:
 
 ```sh
 omarchy bar move cromewar.downloads-stack --section left
 ```
+
+Update later with:
+
+```sh
+omarchy plugin update cromewar.downloads-stack
+```
+
+## Remove
+
+```sh
+omarchy plugin remove cromewar.downloads-stack
+```
+
+This unloads the widget from the running shell and deletes the plugin folder. The plugin
+keeps no other state: it never writes outside its own folder, and the only configuration it
+touches is its own entry in `~/.config/omarchy/shell.json`, which `omarchy plugin enable`
+adds and `omarchy plugin remove` drops. Nothing is installed system-wide and no elevated
+privileges are used.
 
 ## Views
 
@@ -105,10 +114,17 @@ Settings live inline on the widget's entry in `~/.config/omarchy/shell.json`:
   needed.
 - **Colours, font and corner radius** all come from the active Omarchy theme.
 
-## Requirements
+## Requirements and dependencies
 
-Omarchy 4.x (Quickshell shell) on Hyprland, a Nerd Font as the bar font (Omarchy's
-default), and `wl-clipboard` for copy-path.
+- Omarchy 4.x (Quickshell shell) on Hyprland.
+- A Nerd Font as the bar font (Omarchy's default) for the file-type glyphs.
+- `wl-clipboard` (`wl-copy`) for middle-click copy-path. Ships with Omarchy.
+- `xdg-open` to open files and folders. Ships with Omarchy.
+- `nautilus` (optional) so "reveal in Files" can select the file; any other file manager
+  falls back to opening the folder via `xdg-open`.
+
+The plugin is pure QML/JavaScript: nothing is compiled, downloaded or installed beyond the
+plugin folder itself.
 
 ## Troubleshooting
 
@@ -116,9 +132,8 @@ default), and `wl-clipboard` for copy-path.
 though the shell logs `Local plugin changed, reloading`. Run `omarchy restart shell`.
 
 **The icon isn't in the bar.** Check `omarchy plugin list | grep downloads`. If it says
-`disabled`, the shell was not aware of the plugin when the installer tried to enable it —
-`omarchy plugin enable` asks the running shell over IPC, and the shell only knows the
-plugins it found the last time it scanned. Rescan, then enable:
+`disabled`, the shell had not yet picked up the new folder when it was enabled. Rescan,
+then enable:
 
 ```bash
 omarchy-shell shell rescanPlugins
